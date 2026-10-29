@@ -3,3 +3,9 @@ build/
 *.egg-info/
 __pycache__/
 .pytest_cache/
+
+# The root .gitignore excludes *.db to keep the product's 650 MB numbering
+# databases out of history. This one is different: it is 12.8 MB of Ofcom data
+# under the Open Government Licence and it IS the package — without it the
+# library installs and answers None to everything.
+!src/phonelint/_data/uk.db

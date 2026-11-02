@@ -1,0 +1,83 @@
+name: publish
+
+# Tag-triggered, not push-triggered. A release is a deliberate act, and PyPI
+# refuses to overwrite a version that already exists -- so an accidental
+# publish is a version number burned permanently.
+on:
+  push:
+    tags: ["v*"]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Build sdist and wheel
+        run: |
+          python -m pip install --upgrade pip build twine
+          python -m build
+
+      - name: Check the artifacts
+        run: python -m twine check dist/*
+
+      - name: The tag must match the version in pyproject
+        # Publishing v0.1.1 from a tree that still says 0.1.0 produces a release
+        # nobody can install by the name they were given, and the version cannot
+        # be reused. Cheaper to fail here.
+        run: |
+          python - <<'PY'
+          import os, pathlib, re, sys
+          tag = os.environ["GITHUB_REF_NAME"].lstrip("v")
+          src = pathlib.Path("pyproject.toml").read_text()
+          ver = re.search(r'^version\s*=\s*"([^"]+)"', src, re.M).group(1)
+          if tag != ver:
+              sys.exit(f"tag v{tag} != pyproject version {ver}")
+          print(f"tag and version agree: {ver}")
+          PY
+
+      - name: The wheel must contain the dataset
+        # The library installs cleanly and answers None to everything if
+        # package-data misses the .db. The test workflow checks the repo; this
+        # checks the artifact that actually reaches users, which is not the
+        # same thing.
+        run: |
+          python - <<'PY'
+          import glob, sys, zipfile
+          whl = glob.glob("dist/*.whl")
+          if len(whl) != 1:
+              sys.exit(f"expected one wheel, found {whl}")
+          names = zipfile.ZipFile(whl[0]).namelist()
+          db = [n for n in names if n.endswith("uk.db")]
+          if not db:
+              sys.exit(f"no dataset in the wheel: {names}")
+          size = zipfile.ZipFile(whl[0]).getinfo(db[0]).file_size
+          if size < 12_000_000:
+              sys.exit(f"dataset looks truncated: {size:,} bytes")
+          print(f"wheel carries {db[0]} at {size:,} bytes")
+          PY
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist/
+
+  publish:
+    needs: build
+    runs-on: ubuntu-latest
+    # Must match the environment registered with the PyPI trusted publisher.
+    environment: pypi
+    permissions:
+      # The whole point of trusted publishing: GitHub mints a short-lived OIDC
+      # token at run time and PyPI verifies it came from this repo and this
+      # workflow. No API token exists to leak, rotate or store.
+      id-token: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist/
+      - uses: pypa/gh-action-pypi-publish@release/v1

@@ -112,7 +112,7 @@ Code is MIT. The bundled UK data is separate:
 
 > Contains information licensed under the Open Government Licence v3.0.
 
-See [DATA-LICENCE.md](DATA-LICENCE.md). Ofcom does not endorse this package.
+See [DATA-LICENCE.md](https://github.com/phonelint/phonelint-py/blob/main/DATA-LICENCE.md). Ofcom does not endorse this package.
 
 ## Related
 
@@ -123,7 +123,7 @@ on a whole file without uploading it.
 ## Development
 
 ```
-git clone https://github.com/<owner>/phonelint-py
+git clone https://github.com/phonelint/phonelint-py
 cd phonelint-py
 pip install -e . pytest
 pytest -q

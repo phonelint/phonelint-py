@@ -4,11 +4,12 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "phonelint"
-version = "0.1.0"
+version = "0.1.1"
 description = "Carrier, line type and block allocation for phone numbers, on top of libphonenumber"
 readme = "README.md"
 requires-python = ">=3.9"
 license = { text = "MIT" }
+license-files = ["LICENSE", "DATA-LICENCE.md"]
 authors = [{ name = "Phonelint" }]
 keywords = ["phone", "telephone", "carrier", "line-type", "numbering-plan",
             "libphonenumber", "validation", "ofcom", "msisdn"]

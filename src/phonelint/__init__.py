@@ -129,6 +129,15 @@ def lookup(number: str, region: Optional[str] = None) -> Result:
         return Result(number=number)
 
     country = phonenumbers.region_code_for_number(parsed)
+    if country is None:
+        # libphonenumber returns no region for numbers it considers invalid,
+        # which skipped the allocation check entirely -- exactly the numbers most
+        # worth checking. Ofcom's drama mobile range 07700 900xxx came back all
+        # None instead of "not allocated". Fall back to the region that owns the
+        # country code, so the data still gets consulted.
+        country = phonenumbers.region_code_for_country_code(parsed.country_code)
+        if country == "ZZ":
+            country = None
     valid = phonenumbers.is_valid_number(parsed)
     national = str(parsed.national_number)
 

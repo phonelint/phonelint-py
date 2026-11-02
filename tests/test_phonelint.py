@@ -75,3 +75,39 @@ def test_it_adds_what_libphonenumber_does_not():
     n = phonenumbers.parse("+441803930000", None)
     assert carrier.name_for_number(n, "en") == ""      # libphonenumber: nothing
     assert phonelint.lookup("+441803930000").location  # ours: Torquay
+
+
+# Ofcom publishes these ranges for TV and radio drama and does not issue them.
+# They are public, reproducible, and they are what 0.1.0 got wrong: all four
+# came back allocated and reachable, which is the exact opposite of the truth
+# and contradicts the one claim this dataset exists to support.
+# https://www.ofcom.org.uk/phones-and-broadband/phone-numbers/numbers-for-drama
+DRAMA = [
+    "+442079460000", "+442079460999",   # London   020 7946 0xxx
+    "+441134960000", "+441134960999",   # Leeds    0113 496 0xxx
+    "+441184960000",                    # Reading  0118 496 0xxx
+    "+447700900000", "+447700900999",   # mobile   07700 900xxx
+]
+
+
+def test_drama_ranges_are_not_allocated():
+    for n in DRAMA:
+        r = phonelint.lookup(n)
+        assert r.allocated is False, f"{n} reported allocated={r.allocated}"
+        assert r.reachable is False, f"{n} reported reachable={r.reachable}"
+
+
+def test_real_numbers_keep_their_operator():
+    # The counterweight: the fix must not make everything unallocated.
+    for n in ("+442072193000", "+442079304832", "+443700100222"):
+        r = phonelint.lookup(n)
+        assert r.allocated is True, f"{n} reported allocated={r.allocated}"
+        assert r.carrier, f"{n} allocated with no operator named"
+
+
+def test_invalid_numbers_still_reach_the_allocation_data():
+    # libphonenumber returns no region for numbers it calls invalid, which used
+    # to skip the lookup entirely. The mobile drama range is one of those.
+    r = phonelint.lookup("+447700900000")
+    assert r.country == "GB"
+    assert r.allocated is False

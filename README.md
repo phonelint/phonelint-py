@@ -119,3 +119,17 @@ See [DATA-LICENCE.md](DATA-LICENCE.md). Ofcom does not endorse this package.
 Built by the people behind [phonelint.com](https://phonelint.com) — a desktop
 bulk list cleaner and a free browser tool that does the same allocation check
 on a whole file without uploading it.
+
+## Development
+
+```
+git clone https://github.com/<owner>/phonelint-py
+cd phonelint-py
+pip install -e . pytest
+pytest -q
+```
+
+`pip install -e .` matters: this is a `src/` layout, so `pytest` on a fresh
+clone fails with `ModuleNotFoundError: No module named 'phonelint'` until the
+package is installed, or `PYTHONPATH=src` is set. That is the layout working as
+intended, not a broken checkout.

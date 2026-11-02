@@ -7,14 +7,25 @@ on:
 
 jobs:
   test:
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.runner }}
     strategy:
       fail-fast: false
       matrix:
         # The floor pyproject claims, through the current release. If a row
         # here fails, requires-python is wrong -- fix one or the other rather
         # than deleting the row.
-        python-version: ["3.9", "3.10", "3.11", "3.12", "3.13"]
+        python-version: ["3.10", "3.11", "3.12", "3.13"]
+        runner: [ubuntu-latest]
+        include:
+          # ubuntu-latest is now 24.04, which dropped 3.9 from the tool cache,
+          # so setup-python fails before a single test runs. pyproject claims
+          # >=3.9 and the code genuinely supports it -- no match statements, no
+          # dataclass(slots=), `from __future__ import annotations` for PEP 604
+          # -- so the claim is true and the row stays. It moves to the last
+          # runner that ships 3.9 instead of being deleted, because deleting it
+          # would leave an untested promise in requires-python.
+          - python-version: "3.9"
+            runner: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5

@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "phonelint"
-version = "0.1.1"
+version = "0.1.2"
 description = "Carrier, line type and block allocation for phone numbers, on top of libphonenumber"
 readme = "README.md"
 requires-python = ">=3.9"

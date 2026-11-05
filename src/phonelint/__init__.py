@@ -32,7 +32,19 @@ from dataclasses import dataclass
 from typing import Optional
 
 __all__ = ["lookup", "Result", "enrich", "coverage", "__version__"]
-__version__ = "0.1.0"
+
+# Read from the installed metadata rather than restating it here. Hand-written
+# version strings drift: 0.1.1 shipped to PyPI with pyproject saying 0.1.1 and
+# this line still saying 0.1.0, so phonelint.__version__ reported the wrong
+# release to anyone who asked. pyproject.toml is the one source of truth.
+try:
+    from importlib.metadata import PackageNotFoundError, version as _dist_version
+    try:
+        __version__ = _dist_version("phonelint")
+    except PackageNotFoundError:          # running from a source tree, not installed
+        __version__ = "0.0.0+source"
+except ImportError:                       # pragma: no cover - importlib.metadata is 3.8+
+    __version__ = "0.0.0+unknown"
 
 _DATA = pathlib.Path(__file__).parent / "_data"
 # +44 is one numbering plan across four jurisdictions. libphonenumber returns

@@ -47,7 +47,7 @@ This is a companion, not a replacement. Parsing is a solved problem and
 ## Install
 
 ```
-pip install phonelint
+python3 -m pip install phonelint
 ```
 
 `phonenumbers` comes with it. No network calls, no API key, no account. Every
@@ -125,11 +125,16 @@ on a whole file without uploading it.
 ```
 git clone https://github.com/phonelint/phonelint-py
 cd phonelint-py
-pip install -e . pytest
-pytest -q
+python3 -m pip install -e . pytest
+python3 -m pytest -q
 ```
 
-`pip install -e .` matters: this is a `src/` layout, so `pytest` on a fresh
-clone fails with `ModuleNotFoundError: No module named 'phonelint'` until the
-package is installed, or `PYTHONPATH=src` is set. That is the layout working as
-intended, not a broken checkout.
+`python3 -m pip install -e .` matters: this is a `src/` layout, so `pytest` on
+a fresh clone fails with `ModuleNotFoundError: No module named 'phonelint'`
+until the package is installed, or `PYTHONPATH=src` is set. That is the layout
+working as intended, not a broken checkout.
+
+The `python3 -m` prefix is not pedantry. A Framework Python on macOS installs
+`pip3` and no `pip` at all, and a bare `pip` elsewhere can belong to a
+different interpreter than the `python3` that runs the tests -- which installs
+the package somewhere the tests cannot see it.

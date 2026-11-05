@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "phonelint"
-version = "0.1.2"
+version = "0.1.3"
 description = "Carrier, line type and block allocation for phone numbers, on top of libphonenumber"
 readme = "README.md"
 requires-python = ">=3.9"
@@ -17,8 +17,20 @@ classifiers = [
   "Development Status :: 4 - Beta",
   "Intended Audience :: Developers",
   "License :: OSI Approved :: MIT License",
+  # One row per minor, and every one of these is a row in the CI matrix in
+  # .github/workflows/test.yml. A classifier is a claim people filter PyPI by;
+  # listing a version nothing tests is how that claim becomes false quietly.
+  # Add a version here only when its CI row exists and passes.
   "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.9",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Programming Language :: Python :: 3 :: Only",
+  "Operating System :: OS Independent",
   "Topic :: Communications :: Telephony",
+  "Typing :: Typed",
 ]
 
 [project.urls]
@@ -29,4 +41,7 @@ Source = "https://github.com/phonelint/phonelint-py"
 where = ["src"]
 
 [tool.setuptools.package-data]
-phonelint = ["_data/*.db"]
+# py.typed is what makes the annotations in __init__.py visible to mypy and
+# pyright. Without it they are decoration, and the Typing :: Typed classifier
+# would be a claim nothing honours.
+phonelint = ["_data/*.db", "py.typed"]

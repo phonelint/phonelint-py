@@ -29,7 +29,10 @@ import functools
 import pathlib
 import sqlite3
 from dataclasses import dataclass
-from typing import Optional
+from typing import TYPE_CHECKING, Optional
+
+if TYPE_CHECKING:                       # pragma: no cover
+    import phonenumbers
 
 __all__ = ["lookup", "Result", "enrich", "coverage", "__version__"]
 
@@ -170,7 +173,7 @@ def lookup(number: str, region: Optional[str] = None) -> Result:
                   prefix=prefix)
 
 
-def enrich(parsed) -> Result:
+def enrich(parsed: "phonenumbers.PhoneNumber") -> Result:
     """Same as `lookup`, for a number already parsed by `phonenumbers`."""
     import phonenumbers
     return lookup(phonenumbers.format_number(
